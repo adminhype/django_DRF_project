@@ -8,7 +8,7 @@ class Market(models.Model):
     net_worth = models.DecimalField(max_digits=15, decimal_places=2)
 
     def __str__(self):
-        return self.name
+        return f"{self.name}, {self.location}"
 
 
 class Seller(models.Model):
