@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from market_app.models import Market, Seller
+from market_app.models import Market, Seller, Product
 
 
 def validate_no_x(value):
@@ -68,3 +68,50 @@ class SellerCreateSerializer(serializers.Serializer):
         markets = Market.objects.filter(id__in=market_ids)
         seller.markets.set(markets)
         return seller
+
+
+class ProductSerializer(serializers.Serializer):
+    id = serializers.IntegerField(read_only=True)
+    name = serializers.CharField(max_length=100)
+    description = serializers.CharField()
+    price = serializers.DecimalField(max_digits=10, decimal_places=2)
+    market = serializers.StringRelatedField()
+    seller = serializers.StringRelatedField()
+
+    def update(self, instance, validated_data):
+        instance.name = validated_data.get('name', instance.name)
+        instance.description = validated_data.get(
+            'description', instance.description)
+        instance.price = validated_data.get(
+            'price', instance.price)
+        instance.save()
+        return instance
+
+
+class ProductCreateSerializer(serializers.Serializer):
+    name = serializers.CharField(max_length=100)
+    description = serializers.CharField()
+    price = serializers.DecimalField(max_digits=10, decimal_places=2)
+    market_id = serializers.IntegerField(write_only=True)
+    seller_id = serializers.IntegerField(write_only=True)
+
+    def validate_market_id(self, value):
+        try:
+            Market.objects.get(id=value)
+        except Market.DoesNotExist:
+            raise serializers.ValidationError("Market ID not found.")
+        return value
+
+    def validate_seller_id(self, value):
+        try:
+            Seller.objects.get(id=value)
+        except Seller.DoesNotExist:
+            raise serializers.ValidationError("Seller ID not found.")
+        return value
+
+    def create(self, validated_data):
+        market = Market.objects.get(id=validated_data.pop('market_id'))
+        seller = Seller.objects.get(id=validated_data.pop('seller_id'))
+        product = Product.objects.create(
+            market=market, seller=seller, **validated_data)
+        return product
