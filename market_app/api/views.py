@@ -10,7 +10,8 @@ def market_view(request):
 
     if request.method == 'GET':
         markets = Market.objects.all()
-        serializer = MarketSerializer(markets, many=True)
+        serializer = MarketSerializer(
+            markets, many=True, context={'request': request})
         return Response(serializer.data)
 
     if request.method == 'POST':
@@ -27,7 +28,7 @@ def market_single_view(request, pk):
 
     if request.method == 'GET':
         market = Market.objects.get(pk=pk)
-        serializer = MarketSerializer(market)
+        serializer = MarketSerializer(market, context={'request': request})
         return Response(serializer.data)
 
     if request.method == 'PUT':
@@ -61,6 +62,14 @@ def sellers_view(request):
             return Response(serializer.data)
         else:
             return Response(serializer.errors)
+
+
+@api_view()
+def sellers_single_view(request, pk):
+    if request.method == 'GET':
+        seller = Seller.objects.get(pk=pk)
+        serializer = SellerSerializer(seller, context={'request': request})
+        return Response(serializer.data)
 
 
 @api_view(['GET', 'POST'])

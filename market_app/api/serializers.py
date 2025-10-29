@@ -2,7 +2,13 @@ from rest_framework import serializers
 from market_app.models import Market, Seller, Product
 
 
-class MarketSerializer(serializers.ModelSerializer):
+class MarketSerializer(serializers.HyperlinkedModelSerializer):
+
+    # sellers = serializers.HyperlinkedRelatedField(many=True, read_only=True, view_name='seller-single-view')
+
+    sellers = serializers.StringRelatedField(
+        many=True, read_only=True)
+
     class Meta:
         model = Market
         exclude = []
@@ -25,38 +31,15 @@ class SellerSerializer(serializers.ModelSerializer):
         queryset=Market.objects.all(), write_only=True, many=True, source='markets'
     )
 
+    market_count = serializers.SerializerMethodField()
+
     class Meta:
         model = Seller
-        exclude = []
+        fields = ['id', 'name', 'market_ids',
+                  'market_count', 'markets', 'contact_info']
 
-
-# class SellersDetailSerializer(serializers.Serializer):
-#     id = serializers.IntegerField(read_only=True)
-#     name = serializers.CharField(max_length=100)
-#     contact_info = serializers.CharField(max_length=100)
-#     # markets = MarketSerializer(read_only=True, many=True)
-#     markets = serializers.StringRelatedField(many=True)
-
-
-# class SellerCreateSerializer(serializers.Serializer):
-#     name = serializers.CharField(max_length=100)
-#     contact_info = serializers.CharField(max_length=100)
-#     markets = serializers.ListField(
-#         child=serializers.IntegerField(), write_only=True)
-
-#     def validate_markets(self, value):
-#         markets = Market.objects.filter(id__in=value)
-#         if len(markets) != len(value):
-#             raise serializers.ValidationError(
-#                 "One or more market IDs not found.")
-#         return value
-
-#     def create(self, validated_data):
-#         market_ids = validated_data.pop('markets')
-#         seller = Seller.objects.create(**validated_data)
-#         markets = Market.objects.filter(id__in=market_ids)
-#         seller.markets.set(markets)
-#         return seller
+    def get_market_count(self, obj):
+        return obj.markets.count()
 
 
 class ProductSerializer(serializers.Serializer):
