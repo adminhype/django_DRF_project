@@ -63,6 +63,17 @@ class SellerSerializer(serializers.ModelSerializer):
         return obj.markets.count()
 
 
+# class SellerListSerializer(SellerSerializer):
+#     class Meta:
+#         model = Seller
+#         fields = ['id', 'name', 'market_count', 'contact_info']
+
+class SellerListSerializer(SellerSerializer, serializers.HyperlinkedModelSerializer):
+    class Meta:
+        model = Seller
+        fields = ['url', 'name', 'market_count', 'contact_info']
+
+
 class ProductSerializer(serializers.ModelSerializer):
     market = MarketSerializer(read_only=True)
     seller = SellerSerializer(read_only=True)
@@ -83,32 +94,3 @@ class ProductSerializer(serializers.ModelSerializer):
             existing = set(self.fields)
             for field_name in existing - allowed:
                 self.fields.pop(field_name)
-
-
-# class ProductCreateSerializer(serializers.Serializer):
-#     name = serializers.CharField(max_length=100)
-#     description = serializers.CharField()
-#     price = serializers.DecimalField(max_digits=10, decimal_places=2)
-#     market_id = serializers.IntegerField(write_only=True)
-#     seller_id = serializers.IntegerField(write_only=True)
-
-#     def validate_market_id(self, value):
-#         try:
-#             Market.objects.get(id=value)
-#         except Market.DoesNotExist:
-#             raise serializers.ValidationError("Market ID not found.")
-#         return value
-
-#     def validate_seller_id(self, value):
-#         try:
-#             Seller.objects.get(id=value)
-#         except Seller.DoesNotExist:
-#             raise serializers.ValidationError("Seller ID not found.")
-#         return value
-
-#     def create(self, validated_data):
-#         market = Market.objects.get(id=validated_data.pop('market_id'))
-#         seller = Seller.objects.get(id=validated_data.pop('seller_id'))
-#         product = Product.objects.create(
-#             market=market, seller=seller, **validated_data)
-#         return product
