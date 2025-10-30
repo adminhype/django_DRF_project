@@ -8,60 +8,67 @@ from rest_framework import mixins
 from rest_framework import generics
 
 
-class MarketsView(mixins.ListModelMixin,
-                  mixins.CreateModelMixin,
-                  generics.GenericAPIView):
+class MarketsView(generics.ListAPIView):
 
     queryset = Market.objects.all()
     serializer_class = MarketSerializer
 
+
+# class MarketsView(mixins.ListModelMixin,
+#                   mixins.CreateModelMixin,
+#                   generics.GenericAPIView):
+
+#     queryset = Market.objects.all()
+#     serializer_class = MarketSerializer
+
+#     def get(self, request, *args, **kwargs):
+#         return self.list(request, *args, **kwargs)
+
+#     def post(self, request, *args, **kwargs):
+#         return self.create(request, *args, **kwargs)
+
+
+class MarketDetailView(
+    mixins.RetrieveModelMixin,
+    mixins.UpdateModelMixin,
+    mixins.DestroyModelMixin,
+    generics.GenericAPIView,
+):
+    queryset = Market.objects.all()
+    serializer_class = MarketSerializer
+
     def get(self, request, *args, **kwargs):
-        return self.list(request, *args, **kwargs)
+        return self.retrieve(request, *args, **kwargs)
 
-    def post(self, request, *args, **kwargs):
-        return self.create(request, *args, **kwargs)
+    def put(self, request, *args, **kwargs):
+        return self.update(request, *args, **kwargs)
+
+    def delete(self, request, *args, **kwargs):
+        return self.destroy(request, *args, **kwargs)
 
 
-# @api_view(['GET', 'POST'])
-# def market_view(request):
+# @api_view(['GET', 'DELETE', 'PUT'])
+# def market_single_view(request, pk):
 
 #     if request.method == 'GET':
-#         markets = Market.objects.all()
-#         serializer = MarketHyperlinkedSerializer(
-#             markets, many=True, context={'request': request}, fields=('id', 'net_worth'))
+#         market = Market.objects.get(pk=pk)
+#         serializer = MarketSerializer(market, context={'request': request})
 #         return Response(serializer.data)
 
-#     if request.method == 'POST':
-#         serializer = MarketSerializer(data=request.data)
+#     if request.method == 'PUT':
+#         market = Market.objects.get(pk=pk)
+#         serializer = MarketSerializer(market, data=request.data, partial=True)
 #         if serializer.is_valid():
 #             serializer.save()
-#             return Response(serializer.data, status=status.HTTP_201_CREATED)
+#             return Response(serializer.data)
 #         else:
-#             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+#             return Response(serializer.errors)
 
-
-@api_view(['GET', 'DELETE', 'PUT'])
-def market_single_view(request, pk):
-
-    if request.method == 'GET':
-        market = Market.objects.get(pk=pk)
-        serializer = MarketSerializer(market, context={'request': request})
-        return Response(serializer.data)
-
-    if request.method == 'PUT':
-        market = Market.objects.get(pk=pk)
-        serializer = MarketSerializer(market, data=request.data, partial=True)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data)
-        else:
-            return Response(serializer.errors)
-
-    if request.method == 'DELETE':
-        market = Market.objects.get(pk=pk)
-        serializer = MarketSerializer(market)
-        market.delete()
-        return Response(serializer.data)
+#     if request.method == 'DELETE':
+#         market = Market.objects.get(pk=pk)
+#         serializer = MarketSerializer(market)
+#         market.delete()
+#         return Response(serializer.data)
 
 
 class SellerView(mixins.ListModelMixin,
@@ -76,23 +83,6 @@ class SellerView(mixins.ListModelMixin,
 
     def post(self, request, *args, **kwargs):
         return self.create(request, *args, **kwargs)
-
-
-# @api_view(['GET', 'POST'])
-# def sellers_view(request):
-
-#     if request.method == 'GET':
-#         sellers = Seller.objects.all()
-#         serializer = SellerSerializer(sellers, many=True)
-#         return Response(serializer.data)
-
-#     if request.method == 'POST':
-#         serializer = SellerSerializer(data=request.data)
-#         if serializer.is_valid():
-#             serializer.save()
-#             return Response(serializer.data)
-#         else:
-#             return Response(serializer.errors)
 
 
 @api_view()
