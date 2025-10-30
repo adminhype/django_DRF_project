@@ -74,23 +74,28 @@ class SellerListSerializer(SellerSerializer, serializers.HyperlinkedModelSeriali
         fields = ['url', 'name', 'market_count', 'contact_info']
 
 
-class ProductSerializer(serializers.ModelSerializer):
-    market = MarketSerializer(read_only=True)
-    seller = SellerSerializer(read_only=True)
-    market_id = serializers.PrimaryKeyRelatedField(
-        queryset=Market.objects.all(), write_only=True, source='market'
-    )
+# class ProductSerializer(serializers.ModelSerializer):
+#     market = MarketSerializer(read_only=True)
+#     seller = SellerSerializer(read_only=True)
+#     market_id = serializers.PrimaryKeyRelatedField(
+#         queryset=Market.objects.all(), write_only=True, source='market'
+#     )
 
+#     class Meta:
+#         model = Product
+#         fields = ['market', 'market_id', 'seller',
+#                   'name', 'description', 'price',]
+
+#     def __init__(self, *args, **kwargs):
+#         fields = kwargs.pop('fields', None)
+#         super().__init__(*args, **kwargs)
+#         if fields is not None:
+#             allowed = set(fields)
+#             existing = set(self.fields)
+#             for field_name in existing - allowed:
+#                 self.fields.pop(field_name)
+
+class ProductSerializer(serializers.ModelSerializer):
     class Meta:
         model = Product
-        fields = ['market', 'market_id', 'seller',
-                  'name', 'description', 'price',]
-
-    def __init__(self, *args, **kwargs):
-        fields = kwargs.pop('fields', None)
-        super().__init__(*args, **kwargs)
-        if fields is not None:
-            allowed = set(fields)
-            existing = set(self.fields)
-            for field_name in existing - allowed:
-                self.fields.pop(field_name)
+        fields = '__all__'
